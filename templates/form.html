@@ -1,14 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Flask Results</title>
+    <title>WTForms Example</title>
 </head>
 <body>
-    <h1>Submit Something</h1>
-    <form action="/form" method="post">
-        <input type="text" name="data" placeholder="Enter text here" required>
-        <input type="submit" value="Submit">
+    <h1>WTForms Form Example</h1>
+
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        {{ form.data.label }}<br>
+        {{ form.data(size=40) }}<br><br>
+        {{ form.submit() }}
     </form>
 
+    {% for field, errors in form.errors.items() %}
+        <p style="color:red;">
+            {{ field }}: {{ errors[0] }}
+        </p>
+    {% endfor %}
 </body>
 </html>

@@ -1,4 +1,5 @@
 from flask import Flask, request, render_template, redirect, url_for, session
+from forms import TextForm
 
 
 
@@ -20,12 +21,14 @@ def about():
 
 @app.route('/form', methods=['GET', 'POST'])
 def form():
-    if request.method == 'POST':
-        session['my_text'] = request.form.get('data')
+    form = TextForm()
+
+    if form.validate_on_submit():
+        session['my_text'] = form.UserInput.data
         return redirect(url_for('result'))
-    
-    # If it's a GET request → just show the form
-    return render_template('form.html')
+
+    return render_template('form.html', form=form)
+
 
 @app.route('/result')
 def result():
