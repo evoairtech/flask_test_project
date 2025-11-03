@@ -1,6 +1,5 @@
-from flask import Flask, request, render_template, redirect, url_for, session
+from flask import Flask, request, render_template, redirect, url_for, session, jsonify
 from forms import TextForm
-from flask import jsonify       
 
 
 
@@ -42,17 +41,29 @@ def result():
 
 @app.route('/api/info')
 def api_info():
-    return jsonify(message="Hello from Flask!", status="success")
+    return jsonify({
+        "message": "Hello from Flask!",
+        "status": "success"
+    })
+
 
 
 @app.route('/api/submit', methods=['POST'])
 def api_submit():
-    data = request.get_json()
-    text = data.get('text', '')
-    if not data or 'text' not in data:
-        return jsonify(error="Missing 'text' key"), 400
-    
-    return jsonify(received=text, length=len(text))
+    UserData = request.get_json()
+
+    if not UserData or 'text' not in UserData:
+        return jsonify({
+            "error": "Invalid input. Expecting JSON with a 'text' field."
+        }), 400  # HTTP 400 = Bad Request
+
+    user_text = UserData['text']
+    response = {
+        "message": "Data received successfully!",
+        "received_text": user_text
+    }
+    return jsonify(response), 200
+
 
 
 
