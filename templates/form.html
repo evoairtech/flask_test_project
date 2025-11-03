@@ -1,22 +1,49 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>WTForms Example</title>
+    <title>WTForms + JSON API</title>
 </head>
 <body>
-    <h1>WTForms Form Example</h1>
+    <h1>Dynamic JSON Calculator (WTForms)</h1>
 
-    <form method="POST" action="">
+    <form id="calcForm" method="POST">
         {{ form.hidden_tag() }}
-        {{ form.data.label }}<br>
-        {{ form.data(size=40) }}<br><br>
+
+        <label for="x">{{ form.x.label.text }}</label>
+        {{ form.x(size=10, id="x") }}
+
+        <label for="y">{{ form.y.label.text }}</label>
+        {{ form.y(size=10, id="y") }}
+
+        <label for="name">{{ form.name.label.text }}</label>
+        {{ form.name(size=20, id="name") }}
+
         {{ form.submit() }}
     </form>
 
-    {% for field, errors in form.errors.items() %}
-        <p style="color:red;">
-            {{ field }}: {{ errors[0] }}
-        </p>
-    {% endfor %}
+    <h2>Result:</h2>
+    <pre id="result">No calculation yet.</pre>
+
+    <script>
+    document.getElementById('calcForm').addEventListener('submit', async function(e) {
+        e.preventDefault(); // prevent normal form submission
+
+        const x = Number(document.getElementById('x').value);
+        const y = Number(document.getElementById('y').value);
+        const name = document.getElementById('name').value;
+
+        const response = await fetch('/api/calc', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+            },
+            body: JSON.stringify({ x, y, name })
+        });
+
+        const data = await response.json();
+        document.getElementById('result').innerText = JSON.stringify(data, null, 2);
+    });
+    </script>
 </body>
 </html>

@@ -1,72 +1,77 @@
 from flask import Flask, request, render_template, redirect, url_for, session, jsonify
 from forms import TextForm
 
-
-
 app = Flask(__name__)
-app.secret_key = 'nekuv_kluch'  # Required for session to work
+app.secret_key = 'nekuv_kluch'  # Required for session and CSRF
 
-
+# Home route
 @app.route('/')
 def home():
-    print("Testing print HOME")
     return "Welcome to the Home Page!"
 
-
+# About route
 @app.route('/about')
 def about():
-    print("Testing print ABOUT")
     return "This is the About Page."
 
-
+# WTForms route (optional)
 @app.route('/form', methods=['GET', 'POST'])
 def form():
     form = TextForm()
-
     if form.validate_on_submit():
         session['my_text'] = form.UserInput.data
         return redirect(url_for('result'))
-
     return render_template('form.html', form=form)
 
-
+# Result route for WTForms (optional)
 @app.route('/result')
 def result():
-    # eventually this will display the submitted text
     text = session.get('my_text', 'No data submitted yet.')
-    # Clear the session after reading
     session.pop('my_text', None)
     return render_template('results.html', my_text=text)
 
-
+# Simple JSON GET route
 @app.route('/api/info')
 def api_info():
-    return jsonify({
-        "message": "Hello from Flask!",
-        "status": "success"
-    })
+    return jsonify({"message": "Hello from Flask!", "status": "success"})
 
-
-
-@app.route('/api/submit', methods=['POST'])
-def api_submit():
-    UserData = request.get_json()
-
-    if not UserData or 'text' not in UserData:
+# Dynamic JSON route handling GET & POST
+@app.route('/api/calc', methods=['GET', 'POST'])
+def api_calc():
+    if request.method == 'GET':
+        x = request.args.get('x', type=int, default=0)
+        y = request.args.get('y', type=int, default=0)
+        name = request.args.get('name', default='Guest')
+        total = x + y
+        product = x * y
         return jsonify({
-            "error": "Invalid input. Expecting JSON with a 'text' field."
-        }), 400  # HTTP 400 = Bad Request
+            "method": "GET",
+            "greeting": f"Hello {name}!",
+            "x": x,
+            "y": y,
+            "sum": total,
+            "product": product
+        })
 
-    user_text = UserData['text']
-    response = {
-        "message": "Data received successfully!",
-        "received_text": user_text
-    }
-    return jsonify(response), 200
-
-
-
-
+    elif request.method == 'POST':
+        data = request.get_json()
+        if not data or 'x' not in data or 'y' not in data:
+            return jsonify({"error": "JSON must include 'x' and 'y'"}), 400
+        x = data['x']
+        y = data['y']
+        try:
+            quotient = x / y
+        except ZeroDivisionError:
+            quotient = None
+        return jsonify({
+            "method": "POST",
+            "x": x,
+            "y": y,
+            "sum": x + y,
+            "difference": x - y,
+            "product": x * y,
+            "quotient": quotient
+        })
 
 
 if __name__ == '__main__':
