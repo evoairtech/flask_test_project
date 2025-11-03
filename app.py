@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, redirect, url_for, session
 from forms import TextForm
+from flask import jsonify       
 
 
 
@@ -37,6 +38,23 @@ def result():
     # Clear the session after reading
     session.pop('my_text', None)
     return render_template('results.html', my_text=text)
+
+
+@app.route('/api/info')
+def api_info():
+    return jsonify(message="Hello from Flask!", status="success")
+
+
+@app.route('/api/submit', methods=['POST'])
+def api_submit():
+    data = request.get_json()
+    text = data.get('text', '')
+    if not data or 'text' not in data:
+        return jsonify(error="Missing 'text' key"), 400
+    
+    return jsonify(received=text, length=len(text))
+
+
 
 
 
