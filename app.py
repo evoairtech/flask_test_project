@@ -1,10 +1,10 @@
 from flask import Flask, request, render_template, redirect, url_for, session
 
 
-submitted_text = ""
-
 
 app = Flask(__name__)
+app.secret_key = 'nekuv_kluch'  # Required for session to work
+
 
 @app.route('/')
 def home():
@@ -18,29 +18,22 @@ def about():
     return "This is the About Page."
 
 
-@app.route('/form')
+@app.route('/form', methods=['GET', 'POST'])
 def form():
-    print("Testing print FORM")
-    return render_template('form.html')
-
-
-@app.route('/submit', methods=['GET', 'POST'])
-def submit():
-
-    global submitted_text
-    
     if request.method == 'POST':
-        submitted_text = request.form.get('data')
-    else:
-        submitted_text = request.args.get('data')
-
-    return redirect(url_for('result'))
-
+        session['my_text'] = request.form.get('data')
+        return redirect(url_for('result'))
+    
+    # If it's a GET request → just show the form
+    return render_template('form.html')
 
 @app.route('/result')
 def result():
     # eventually this will display the submitted text
-    return render_template('results.html', my_text=submitted_text)
+    text = session.get('my_text', 'No data submitted yet.')
+    # Clear the session after reading
+    session.pop('my_text', None)
+    return render_template('results.html', my_text=text)
 
 
 
