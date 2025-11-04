@@ -7,7 +7,19 @@ app.secret_key = 'nekuv_kluch'  # Required for session and CSRF
 # Home route
 @app.route('/')
 def home():
-    return "Welcome to the Home Page!"
+    return render_template('index.html')
+
+
+# Dynamic JavaScript route
+@app.route('/dynamic.js')
+def dynamic_js():
+    username = "Emil"  # this could come from session, request, or DB
+    js_code = f"""
+    console.log("Dynamic JS loaded from Flask!");
+    alert("Hello, {username}! This script was generated dynamically by Flask!");
+    """
+    return js_code, 200, {'Content-Type': 'application/javascript'}
+
 
 # About route
 @app.route('/about')
@@ -72,6 +84,34 @@ def api_calc():
             "product": x * y,
             "quotient": quotient
         })
+
+
+# AJAX guide route
+@app.route('/ajax')
+def ajax_page():
+    return render_template('ajax_test.html')
+
+
+@app.route('/api/data')
+def api_data():
+    return jsonify({
+        "message": "Hello from Flask!",
+        "time": "2025-11-04 15:00",
+        "info": "This came from a GET request."
+    })
+
+
+@app.route('/api/submit', methods=['POST'])
+def api_submit():
+    data = request.get_json()
+    text = data.get('text', '(no text received)')
+    print(f"Received via AJAX: {text}")
+    return jsonify({
+        "response": f"Server got your message: {text.upper()}",
+        "length": len(text)
+    })
+
+
 
 
 if __name__ == '__main__':

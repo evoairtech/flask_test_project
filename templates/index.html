@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dynamic JS Example</title>
+</head>
+<body>
+    <h1>Dynamic JS from Flask</h1>
+
+    <p>Static JS below:</p>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <p>Dynamic JS below:</p>
+    <script src="/dynamic.js"></script>
+</body>
+</html>
